@@ -1,10 +1,26 @@
 import Image from "next/image";
+import { SignIn,SignUp } from "../../server/users";
+import SignOutComponent from "./signout"
+import { auth } from "../../lib/auth";
+import { headers } from "next/headers";
 
-export default function Home() {
+export default async function Home() {
+  const session=await auth.api.getSession(
+    { headers:await headers(),
+      
+
+    }
+
+  )
   return (
-    <div  className="text-3xl">
-      Hello
-       
-    </div>
+    <main className="text-xl p-10 flex mr-20 gap-10 justify-end ">
+      <button onClick={SignIn}>Sign In</button>
+       <button onClick={SignUp}>Sign Up</button>
+         <SignOutComponent/>
+         <div>
+     
+     { !session?"Not authenticated":session.user.name}
+         </div>
+    </main>
   );
 }
