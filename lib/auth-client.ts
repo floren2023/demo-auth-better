@@ -1,5 +1,6 @@
 import { createAuthClient } from "better-auth/react"
-import router from "next/dist/client/router";
+
+import { redirect } from "next/navigation";
 
 export const authClient = createAuthClient({
     /** The base URL of the server (optional if you're using the same domain) */
@@ -8,10 +9,10 @@ export const authClient = createAuthClient({
 
 export const SignOut=async()=>{
     await authClient.signOut({
-  fetchOptions: {
+  /* fetchOptions: {
     onSuccess: () => {
-      router.push("/login"); // redirect to login page
+      redirect("/") // redirect to login page
     },
-  },
+  }, */
 });
 }

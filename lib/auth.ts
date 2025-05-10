@@ -10,7 +10,8 @@ import { nextCookies } from "better-auth/next-js";
 export const auth = betterAuth({
 
     emailAndPassword: { 
-    enabled: true, 
+    enabled: true,
+    requireEmailVerification:true 
   }, 
     database: drizzleAdapter(db, {
         provider: "pg", 
@@ -21,3 +22,6 @@ export const auth = betterAuth({
     
  
 });
+
+export type ErrorCode = keyof typeof auth.$ERROR_CODES | "UNKNOWN";
+export type Session=typeof auth.$Infer.Session
