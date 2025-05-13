@@ -25,8 +25,7 @@ async function Navbar({session}:{session:Session|null}) {
         <SignOutButton />
       )}
 
-      {/*  <button onClick={SignIn}>Sign In</button>
-       <button onClick={SignUp}>Sign Up</button>*/}
+     
     </nav>
   );
 }

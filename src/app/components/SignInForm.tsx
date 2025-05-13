@@ -16,10 +16,14 @@ import { Input } from "@/app/components/ui/input";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
 
-import useToast from "react-hook-toast";
+import { toast } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import GoogleAuthButton from "./GoogleAuthButton";
+import LoadingButton from "./LoadingButton";
+import { authClient } from "../../../lib/auth-client";
+
 
 const signInSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -35,7 +39,7 @@ type FormData = {
 };
 
 export default function SignInForm() {
-  const toast = useToast();
+  
 
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -49,26 +53,27 @@ export default function SignInForm() {
   });
 
   const onSubmit = async (values: SignInFormValues) => {
-    const form = new FormData();
-    form.append("email", values.email);
-    form.append("password", values.password);
-    setPending(true);
-    const res = await SignIn(form);
-    if(res.message!=="OK"){
-    
-      
-      toast({
-        title:"Missing email or pass",        
-        type: "error",
-        interval: 2000,
-        // type: "error"
-        // type: "warrning"
-      });
-    } else {
-      router.push("/dashboard");
-      router.refresh();
-    }
-
+     form.reset();
+    await authClient.signIn.email(
+      {
+        email: values.email,
+        password: values.password,
+        
+      },
+      {
+        onRequest: () => {
+          setPending(true);
+        },
+        onSuccess: () => {
+          router.push("/dashboard");
+        },
+        onError: (ctx) => {
+          console.log("error", ctx);
+          toast.error(`something went wrong ${ctx.error.message}`)
+          router.push("/");
+        },
+      },
+    );
     setPending(false);
   };
 
@@ -77,7 +82,7 @@ export default function SignInForm() {
       <CardContent>
         <h2 className="text-2xl font-semibold mb-4">Sign In</h2>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mb-10">
             <FormField
               control={form.control}
               name="email"
@@ -105,13 +110,18 @@ export default function SignInForm() {
                 </FormItem>
               )}
             />
-
-            <Button type="submit" className="w-full">
-              Sign In
-            </Button>
+            <LoadingButton pending={pending}>Sign In</LoadingButton>
+            
           </form>
         </Form>
-        <Link href="/">Forgot password?</Link>
+        
+
+        <div className="flex flex-col gap-5">
+          <GoogleAuthButton action="signin"
+           buttonText="SignIn with Google" redirectTo="/dashboard"/>
+        
+        <Link href="/forgot-password"  className="text-red-700 text-sm text-center">Forgot password?</Link>
+        </div>
       </CardContent>
     </Card>
   );

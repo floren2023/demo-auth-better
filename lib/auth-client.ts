@@ -1,6 +1,6 @@
 import { createAuthClient } from "better-auth/react"
 
-import { redirect } from "next/navigation";
+
 
 export const authClient = createAuthClient({
     /** The base URL of the server (optional if you're using the same domain) */
@@ -9,10 +9,24 @@ export const authClient = createAuthClient({
 
 export const SignOut=async()=>{
     await authClient.signOut({
-  /* fetchOptions: {
-    onSuccess: () => {
-      redirect("/") // redirect to login page
-    },
-  }, */
+  
 });
 }
+const signInGoogle = async () => {
+    const data = await authClient.signIn.social({
+        provider: "google"
+    })
+}
+
+export const {
+  signIn,
+  signUp,
+  
+  signOut,
+  useSession,
+  
+  sendVerificationEmail,
+  forgetPassword,
+  resetPassword,
+  updateUser,
+} = authClient;

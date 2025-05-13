@@ -13,14 +13,16 @@ import {
   FormMessage,
 } from "@/app/components/ui/form";
 import { Input } from "@/app/components/ui/input";
-import { authClient } from "../../../lib/auth-client";
+
 import { Card, CardContent } from "@/app/components/ui/card";
-import { SignUp } from "../../../server/users";
+
 import LoadingButton from "./LoadingButton";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import GoogleAuthButton from "./GoogleAuthButton";
+import { authClient } from "../../../lib/auth-client";
 
 const signUpSchema = z
   .object({
@@ -53,21 +55,37 @@ export default function SignUpForm() {
   });
 
   const onSubmit = async (values: SignUpFormValues) => {
-    const form = new FormData();
-    form.append("email", values.email);
-    form.append("password", values.password);
-    form.append("name", values.name);
-    setPending(true);
+   form.reset()
+    await authClient.signUp.email({
+      email: values.email,
+      password: values.password,
+      name: values.name,
+    },
+      {
+        onRequest:()=>{
+          setPending(true)
+        },
+        onSuccess:()=>{
+          toast.success(
+            "Account created.Check your email for confirmation",
+          );
+          console.log("success")
+          router.push("/sign-in");
+          router.refresh();
+        
+        },
+        onError: (ctx) => {
+          console.log("error",ctx)
+          toast( `something went wrong ${ ctx.error.message}`)
+           console.log("success")
+          router.push("/");
+          router.refresh();
+        
+          console.log("error",ctx.error.message)
+      },
 
-    const { success, error } = await SignUp(form);
-    if (error !== "" && !error) {
-      toast("Fail to create your account");
-      setPending(false);
-    } else {
-      toast("Your account has been created!");
-      setPending(false);
-      router.push("/dashboard");
-    }
+    })
+    setPending(false)
   };
 
   return (
@@ -75,7 +93,7 @@ export default function SignUpForm() {
       <CardContent>
         <h2 className="text-2xl font-semibold mb-4">Create Account</h2>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mb-5">
             <FormField
               control={form.control}
               name="name"
@@ -132,9 +150,14 @@ export default function SignUpForm() {
             <LoadingButton pending={pending}>Sign Up</LoadingButton>
           </form>
         </Form>
-        <Link href="/sign-in">
-          You already have an account? <span>Click here</span>
+         <div className="flex flex-col  gap-5">
+          <GoogleAuthButton action="signup"
+           buttonText="SignUp with Google" redirectTo="/dashboard"/>
+        
+        <Link href="/sign-in" className="flex items-center justify-center text-center text-sm text-violet-700">
+          You already have an account? <span className="text-sm text-red-700 pl-2">Click here</span>
         </Link>
+        </div>
       </CardContent>
     </Card>
   );
