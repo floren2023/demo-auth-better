@@ -20,12 +20,11 @@ const signInGoogle = async () => {
 
 export const {
   signIn,
-  signUp,
-  
+  signUp,  
   signOut,
   useSession,
   
-  sendVerificationEmail,
+//   sendVerificationEmail,
   forgetPassword,
   resetPassword,
   updateUser,
